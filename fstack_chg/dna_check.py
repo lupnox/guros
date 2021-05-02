@@ -1,18 +1,6 @@
-import json
-import uuuid
-import logging
-
-
-def _main(data):
-	#validate data input if bad return 400
-
-
-	if(hasMutation(data)):
-		#log, put on dynamo, return 200
-	else:
-		#log, put on dynamo, return 403
-
-def hasMutation(dna):
+#Main function to check for sequences of repeated dna code
+#EMV
+def cerebro(dna):
 	n = len(dna)
 	mcount = 0
 	gna = ['A','C','G','T']
@@ -49,3 +37,4 @@ def hasMutation(dna):
 					if(mcount>1):
 						print('mutant!')
 						return True
+	return False
