@@ -1,6 +1,6 @@
 service: guros-challange
 
-frameworkVersion: ">=1.1.0 <=2.1.1"
+frameworkVersion: "2"
 
 provider:
   name: aws
@@ -18,19 +18,18 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
-      
+
 functions:
   check:
     handler: dna_check.cerebro
     events:
       - http: 'POST /mutation'
   getstats:
-    handler: dynamo.get_stats
+    handler: dynapp.get_stats
     events:
       - http: 'GET /stats'
 
 plugins:
-  - serverless-wsgi
   - serverless-python-requirements
 
 resources:
@@ -47,4 +46,4 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:custom.tableName}
+        TableName: dna-table

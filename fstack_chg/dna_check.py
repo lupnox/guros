@@ -8,29 +8,30 @@ from dynapp import save_entry
 def cerebro(event,context):
 	#base validation
 	data = json.loads(event['body'])
-    if 'dna' not in data:
-        logging.error("Validation Failed")
-        raise Exception("Expected data in 'dna' key")
-        return
-	if(scan_dna(data['dna'])):
+	if 'dna' not in data:
+		logging.error("Validation Failed")
+		raise Exception("Expected data in 'dna' key")
+		return
+
+	mutant =scan_dna(data['dna'])
+	if(mutant):
 		response = {
-        "statusCode": 200,
-        "body": "Mutation found!"                  
-    	}
-    else:
-    	response = {
-        "statusCode": 403,
-        "body": "No mutation found"                  
-    	}
-    return response
+			"statusCode": 200,
+			"body": "Mutation found!"                  
+		}
+	else:
+		response = {
+			"statusCode": 403,
+			"body": "No mutation found"                  
+		}
+		return response
 
-
-def scan_dna(dna)
+def scan_dna(dna):
 	n = len(dna)
 	mcount = 0
 	gna = ['A','C','G','T']
 	for element in gna:		
-		#horizonal lookup
+	#horizonal lookup
 		for i in range(n-3):
 			for j in range(n):
 				if dna[j][i] == element and dna[j][i+1] == element and dna[j][i+2] == element and dna[j][i+3] == element:

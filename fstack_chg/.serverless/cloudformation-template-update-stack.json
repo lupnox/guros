@@ -71,10 +71,16 @@
         }
       }
     },
-    "ApiLogGroup": {
+    "CheckLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/guros-challange-dev-api"
+        "LogGroupName": "/aws/lambda/guros-challange-dev-check"
+      }
+    },
+    "GetstatsLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/guros-challange-dev-getstats"
       }
     },
     "IamRoleLambdaExecution": {
@@ -144,14 +150,7 @@
                     "dynamodb:UpdateItem",
                     "dynamodb:DeleteItem"
                   ],
-                  "Resource": [
-                    {
-                      "Fn::GetAtt": [
-                        "DNATable",
-                        "Arn"
-                      ]
-                    }
-                  ]
+                  "Resource": "arn:aws:dynamodb:us-west-1:*:table/guros-challange-dev"
                 }
               ]
             }
@@ -173,23 +172,23 @@
         }
       }
     },
-    "ApiLambdaFunction": {
+    "CheckLambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/guros-challange/dev/1619935914730-2021-05-02T06:11:54.730Z/guros-challange.zip"
+          "S3Key": "serverless/guros-challange/dev/1619940281773-2021-05-02T07:24:41.773Z/guros-challange.zip"
         },
-        "Handler": "wsgi_handler.handler",
+        "Handler": "dna_check.cerebro",
         "Runtime": "python3.8",
-        "FunctionName": "guros-challange-dev-api",
+        "FunctionName": "guros-challange-dev-check",
         "MemorySize": 1024,
         "Timeout": 6,
         "Environment": {
           "Variables": {
-            "DNA_TABLE": "dna-table-dev"
+            "DYNAMODB_TABLE": "guros-challange-dev"
           }
         },
         "Role": {
@@ -200,17 +199,57 @@
         }
       },
       "DependsOn": [
-        "ApiLogGroup"
+        "CheckLogGroup"
       ]
     },
-    "ApiLambdaVersionesZCygs7tzHFYenvndmcKJy7QENLn8hwvxK5uP684": {
+    "GetstatsLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/guros-challange/dev/1619940281773-2021-05-02T07:24:41.773Z/guros-challange.zip"
+        },
+        "Handler": "dynapp.get_stats",
+        "Runtime": "python3.8",
+        "FunctionName": "guros-challange-dev-getstats",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "DYNAMODB_TABLE": "guros-challange-dev"
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "GetstatsLogGroup"
+      ]
+    },
+    "CheckLambdaVersioncFYOLcxWlQx1EAyM0qdMIPlJuIlXr1KdnMvuC9IqgI": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
-          "Ref": "ApiLambdaFunction"
+          "Ref": "CheckLambdaFunction"
         },
-        "CodeSha256": "XHyOBdsWO+JtAv1iT6Bt/1kevB3YApfEP4AnWtq4u2c="
+        "CodeSha256": "QIL587SGnwbQDBA3wCx95OArzmEC9YM2vBNFXrDtGXc="
+      }
+    },
+    "GetstatsLambdaVersionsU6j5iPtDBXmSjrwj9xoFEIsNVT0LREMoKNJm3lQR0": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "GetstatsLambdaFunction"
+        },
+        "CodeSha256": "QIL587SGnwbQDBA3wCx95OArzmEC9YM2vBNFXrDtGXc="
       }
     },
     "ApiGatewayRestApi": {
@@ -225,7 +264,7 @@
         "Policy": ""
       }
     },
-    "ApiGatewayResourceProxyVar": {
+    "ApiGatewayResourceMutation": {
       "Type": "AWS::ApiGateway::Resource",
       "Properties": {
         "ParentId": {
@@ -234,65 +273,34 @@
             "RootResourceId"
           ]
         },
-        "PathPart": "{proxy+}",
+        "PathPart": "mutation",
         "RestApiId": {
           "Ref": "ApiGatewayRestApi"
         }
       }
     },
-    "ApiGatewayMethodAny": {
-      "Type": "AWS::ApiGateway::Method",
+    "ApiGatewayResourceStats": {
+      "Type": "AWS::ApiGateway::Resource",
       "Properties": {
-        "HttpMethod": "ANY",
-        "RequestParameters": {},
-        "ResourceId": {
+        "ParentId": {
           "Fn::GetAtt": [
             "ApiGatewayRestApi",
             "RootResourceId"
           ]
         },
+        "PathPart": "stats",
         "RestApiId": {
           "Ref": "ApiGatewayRestApi"
-        },
-        "ApiKeyRequired": false,
-        "AuthorizationType": "NONE",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region"
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "ApiLambdaFunction",
-                    "Arn"
-                  ]
-                },
-                "/invocations"
-              ]
-            ]
-          }
-        },
-        "MethodResponses": []
+        }
       }
     },
-    "ApiGatewayMethodProxyVarAny": {
+    "ApiGatewayMethodMutationPost": {
       "Type": "AWS::ApiGateway::Method",
       "Properties": {
-        "HttpMethod": "ANY",
+        "HttpMethod": "POST",
         "RequestParameters": {},
         "ResourceId": {
-          "Ref": "ApiGatewayResourceProxyVar"
+          "Ref": "ApiGatewayResourceMutation"
         },
         "RestApiId": {
           "Ref": "ApiGatewayRestApi"
@@ -317,7 +325,7 @@
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "ApiLambdaFunction",
+                    "CheckLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -329,7 +337,50 @@
         "MethodResponses": []
       }
     },
-    "ApiGatewayDeployment1619935890966": {
+    "ApiGatewayMethodStatsGet": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "GET",
+        "RequestParameters": {},
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceStats"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "GetstatsLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "MethodResponses": []
+      }
+    },
+    "ApiGatewayDeployment1619940269760": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -338,16 +389,53 @@
         "StageName": "dev"
       },
       "DependsOn": [
-        "ApiGatewayMethodAny",
-        "ApiGatewayMethodProxyVarAny"
+        "ApiGatewayMethodMutationPost",
+        "ApiGatewayMethodStatsGet"
       ]
     },
-    "ApiLambdaPermissionApiGateway": {
+    "CheckLambdaPermissionApiGateway": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "FunctionName": {
           "Fn::GetAtt": [
-            "ApiLambdaFunction",
+            "CheckLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      }
+    },
+    "GetstatsLambdaPermissionApiGateway": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "GetstatsLambdaFunction",
             "Arn"
           ]
         },
@@ -398,7 +486,7 @@
           "ReadCapacityUnits": 1,
           "WriteCapacityUnits": 1
         },
-        "TableName": "dna-table-dev"
+        "TableName": "dna-table"
       }
     }
   },
@@ -411,13 +499,22 @@
         "Name": "sls-guros-challange-dev-ServerlessDeploymentBucketName"
       }
     },
-    "ApiLambdaFunctionQualifiedArn": {
+    "CheckLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ApiLambdaVersionesZCygs7tzHFYenvndmcKJy7QENLn8hwvxK5uP684"
+        "Ref": "CheckLambdaVersioncFYOLcxWlQx1EAyM0qdMIPlJuIlXr1KdnMvuC9IqgI"
       },
       "Export": {
-        "Name": "sls-guros-challange-dev-ApiLambdaFunctionQualifiedArn"
+        "Name": "sls-guros-challange-dev-CheckLambdaFunctionQualifiedArn"
+      }
+    },
+    "GetstatsLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "GetstatsLambdaVersionsU6j5iPtDBXmSjrwj9xoFEIsNVT0LREMoKNJm3lQR0"
+      },
+      "Export": {
+        "Name": "sls-guros-challange-dev-GetstatsLambdaFunctionQualifiedArn"
       }
     },
     "ServiceEndpoint": {

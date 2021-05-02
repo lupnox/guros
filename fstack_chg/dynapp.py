@@ -8,9 +8,9 @@ import logging
 USERS_TABLE = os.environ['DNA_TABLE']
 
 
-def save_entry():
+def save_entry(result):
     return
 
 
-def get_results():
+def get_results(event,context):
     return
