@@ -179,7 +179,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/guros-challange/dev/1619940281773-2021-05-02T07:24:41.773Z/guros-challange.zip"
+          "S3Key": "serverless/guros-challange/dev/1619941280525-2021-05-02T07:41:20.525Z/guros-challange.zip"
         },
         "Handler": "dna_check.cerebro",
         "Runtime": "python3.8",
@@ -209,7 +209,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/guros-challange/dev/1619940281773-2021-05-02T07:24:41.773Z/guros-challange.zip"
+          "S3Key": "serverless/guros-challange/dev/1619941280525-2021-05-02T07:41:20.525Z/guros-challange.zip"
         },
         "Handler": "dynapp.get_stats",
         "Runtime": "python3.8",
@@ -232,24 +232,24 @@
         "GetstatsLogGroup"
       ]
     },
-    "CheckLambdaVersioncFYOLcxWlQx1EAyM0qdMIPlJuIlXr1KdnMvuC9IqgI": {
+    "CheckLambdaVersionYJxPGUdmIJPOAVNKooPyVtUT8hr0wwlximdb8Fm9vQ": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "CheckLambdaFunction"
         },
-        "CodeSha256": "QIL587SGnwbQDBA3wCx95OArzmEC9YM2vBNFXrDtGXc="
+        "CodeSha256": "1X9J1F+AERA1oWTnqJ0oTn/LZ6PIPlHG4VFhJSGT8T4="
       }
     },
-    "GetstatsLambdaVersionsU6j5iPtDBXmSjrwj9xoFEIsNVT0LREMoKNJm3lQR0": {
+    "GetstatsLambdaVersionh6KKRdBq14p0rWplQBhg5ZpLtCToQJCiEqx0KvrdBWI": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetstatsLambdaFunction"
         },
-        "CodeSha256": "QIL587SGnwbQDBA3wCx95OArzmEC9YM2vBNFXrDtGXc="
+        "CodeSha256": "1X9J1F+AERA1oWTnqJ0oTn/LZ6PIPlHG4VFhJSGT8T4="
       }
     },
     "ApiGatewayRestApi": {
@@ -380,7 +380,7 @@
         "MethodResponses": []
       }
     },
-    "ApiGatewayDeployment1619940269760": {
+    "ApiGatewayDeployment1619941268535": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -502,7 +502,7 @@
     "CheckLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "CheckLambdaVersioncFYOLcxWlQx1EAyM0qdMIPlJuIlXr1KdnMvuC9IqgI"
+        "Ref": "CheckLambdaVersionYJxPGUdmIJPOAVNKooPyVtUT8hr0wwlximdb8Fm9vQ"
       },
       "Export": {
         "Name": "sls-guros-challange-dev-CheckLambdaFunctionQualifiedArn"
@@ -511,7 +511,7 @@
     "GetstatsLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetstatsLambdaVersionsU6j5iPtDBXmSjrwj9xoFEIsNVT0LREMoKNJm3lQR0"
+        "Ref": "GetstatsLambdaVersionh6KKRdBq14p0rWplQBhg5ZpLtCToQJCiEqx0KvrdBWI"
       },
       "Export": {
         "Name": "sls-guros-challange-dev-GetstatsLambdaFunctionQualifiedArn"

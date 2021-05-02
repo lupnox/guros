@@ -1,6 +1,6 @@
 #DynamoDB handler
 import os
-import uuidss
+import uuid
 import boto3
 import logging
 
