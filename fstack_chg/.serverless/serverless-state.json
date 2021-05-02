@@ -1,15 +1,44 @@
 {
   "service": {
-    "service": "serverless-flask",
+    "service": "guros-challange",
     "serviceObject": {
-      "name": "serverless-flask"
+      "name": "guros-challange"
     },
     "provider": {
       "name": "aws",
       "runtime": "python3.8",
+      "lambdaHashingVersion": "20201221",
       "stage": "dev",
-      "region": "us-west-1",
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem"
+              ],
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "DNATable",
+                    "Arn"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "environment": {
+        "DNA_TABLE": "dna-table-dev"
+      },
       "variableSyntax": "\\${([^{}:]+?(?:\\(|:)(?:[^:{}][^{}]*?)?)}",
+      "region": "us-east-1",
       "versionFunctions": true,
       "compiledCloudFormationTemplate": {
         "AWSTemplateFormatVersion": "2010-09-09",
@@ -84,10 +113,10 @@
               }
             }
           },
-          "AppLogGroup": {
+          "ApiLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/serverless-flask-dev-app"
+              "LogGroupName": "/aws/lambda/guros-challange-dev-api"
             }
           },
           "IamRoleLambdaExecution": {
@@ -115,7 +144,7 @@
                     "Fn::Join": [
                       "-",
                       [
-                        "serverless-flask",
+                        "guros-challange",
                         "dev",
                         "lambda"
                       ]
@@ -132,7 +161,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/guros-challange-dev*:*"
                           }
                         ]
                       },
@@ -143,9 +172,12 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev*:*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/guros-challange-dev*:*:*"
                           }
                         ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][0]"
                       }
                     ]
                   }
@@ -156,7 +188,7 @@
                 "Fn::Join": [
                   "-",
                   [
-                    "serverless-flask",
+                    "guros-challange",
                     "dev",
                     {
                       "Ref": "AWS::Region"
@@ -167,20 +199,25 @@
               }
             }
           },
-          "AppLambdaFunction": {
+          "ApiLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/serverless-flask/dev/1619925148956-2021-05-02T03:12:28.956Z/serverless-flask.zip"
+                "S3Key": "serverless/guros-challange/dev/1619935914730-2021-05-02T06:11:54.730Z/guros-challange.zip"
               },
               "Handler": "wsgi_handler.handler",
               "Runtime": "python3.8",
-              "FunctionName": "serverless-flask-dev-app",
+              "FunctionName": "guros-challange-dev-api",
               "MemorySize": 1024,
               "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DNA_TABLE": "dna-table-dev"
+                }
+              },
               "Role": {
                 "Fn::GetAtt": [
                   "IamRoleLambdaExecution",
@@ -189,23 +226,23 @@
               }
             },
             "DependsOn": [
-              "AppLogGroup"
+              "ApiLogGroup"
             ]
           },
-          "AppLambdaVersioncKseB1jVtUvL0rIiELfwTTcH8adKtwAB1lD6uisGeU": {
+          "ApiLambdaVersionesZCygs7tzHFYenvndmcKJy7QENLn8hwvxK5uP684": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "AppLambdaFunction"
+                "Ref": "ApiLambdaFunction"
               },
-              "CodeSha256": "fuVsXAkGso5iN6fEdBHkpbxZ7/Tk24Ey2mQyS5yGYEE="
+              "CodeSha256": "XHyOBdsWO+JtAv1iT6Bt/1kevB3YApfEP4AnWtq4u2c="
             }
           },
           "ApiGatewayRestApi": {
             "Type": "AWS::ApiGateway::RestApi",
             "Properties": {
-              "Name": "dev-serverless-flask",
+              "Name": "dev-guros-challange",
               "EndpointConfiguration": {
                 "Types": [
                   "EDGE"
@@ -263,7 +300,7 @@
                       ":lambda:path/2015-03-31/functions/",
                       {
                         "Fn::GetAtt": [
-                          "AppLambdaFunction",
+                          "ApiLambdaFunction",
                           "Arn"
                         ]
                       },
@@ -306,7 +343,7 @@
                       ":lambda:path/2015-03-31/functions/",
                       {
                         "Fn::GetAtt": [
-                          "AppLambdaFunction",
+                          "ApiLambdaFunction",
                           "Arn"
                         ]
                       },
@@ -318,7 +355,7 @@
               "MethodResponses": []
             }
           },
-          "ApiGatewayDeployment1619925144778": {
+          "ApiGatewayDeployment1619935890966": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -331,12 +368,12 @@
               "ApiGatewayMethodProxyVarAny"
             ]
           },
-          "AppLambdaPermissionApiGateway": {
+          "ApiLambdaPermissionApiGateway": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "AppLambdaFunction",
+                  "ApiLambdaFunction",
                   "Arn"
                 ]
               },
@@ -367,6 +404,28 @@
                 ]
               }
             }
+          },
+          "DNATable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "dnaId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "dnaId",
+                  "KeyType": "HASH"
+                }
+              ],
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": 1,
+                "WriteCapacityUnits": 1
+              },
+              "TableName": "dna-table-dev"
+            }
           }
         },
         "Outputs": {
@@ -375,16 +434,16 @@
               "Ref": "ServerlessDeploymentBucket"
             },
             "Export": {
-              "Name": "sls-serverless-flask-dev-ServerlessDeploymentBucketName"
+              "Name": "sls-guros-challange-dev-ServerlessDeploymentBucketName"
             }
           },
-          "AppLambdaFunctionQualifiedArn": {
+          "ApiLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AppLambdaVersioncKseB1jVtUvL0rIiELfwTTcH8adKtwAB1lD6uisGeU"
+              "Ref": "ApiLambdaVersionesZCygs7tzHFYenvndmcKJy7QENLn8hwvxK5uP684"
             },
             "Export": {
-              "Name": "sls-serverless-flask-dev-AppLambdaFunctionQualifiedArn"
+              "Name": "sls-guros-challange-dev-ApiLambdaFunctionQualifiedArn"
             }
           },
           "ServiceEndpoint": {
@@ -410,7 +469,7 @@
               ]
             },
             "Export": {
-              "Name": "sls-serverless-flask-dev-ServiceEndpoint"
+              "Name": "sls-guros-challange-dev-ServiceEndpoint"
             }
           }
         }
@@ -500,38 +559,70 @@
       "vpc": {}
     },
     "custom": {
+      "tableName": "dna-table-dev",
       "wsgi": {
-        "app": "app.app",
-        "packRequirements": false
-      },
-      "pythonRequirements": {
-        "dockerizePip": "non-linux"
+        "app": "app.app"
       }
     },
     "plugins": [
-      "serverless-python-requirements",
-      "serverless-wsgi"
+      "serverless-wsgi",
+      "serverless-python-requirements"
     ],
     "pluginsData": {},
     "functions": {
-      "app": {
+      "api": {
         "handler": "wsgi_handler.handler",
         "events": [
           {
-            "http": "ANY /"
+            "http": {
+              "path": "",
+              "method": "any",
+              "integration": "AWS_PROXY"
+            }
           },
           {
-            "http": "ANY {proxy+}"
+            "http": {
+              "path": "{proxy+}",
+              "method": "any",
+              "integration": "AWS_PROXY"
+            }
           }
         ],
-        "name": "serverless-flask-dev-app",
+        "name": "guros-challange-dev-api",
         "package": {},
         "memory": 1024,
         "timeout": 6,
         "runtime": "python3.8",
         "vpc": {},
-        "versionLogicalId": "AppLambdaVersioncKseB1jVtUvL0rIiELfwTTcH8adKtwAB1lD6uisGeU"
+        "versionLogicalId": "ApiLambdaVersionesZCygs7tzHFYenvndmcKJy7QENLn8hwvxK5uP684"
       }
+    },
+    "resources": {
+      "Resources": {
+        "DNATable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "dnaId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "dnaId",
+                "KeyType": "HASH"
+              }
+            ],
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 1,
+              "WriteCapacityUnits": 1
+            },
+            "TableName": "dna-table-dev"
+          }
+        }
+      },
+      "Outputs": {}
     },
     "configValidationMode": "warn",
     "serviceFilename": "serverless.yml",
@@ -540,9 +631,7 @@
       "service": {
         "$ref": "$[\"service\"][\"serviceObject\"]"
       },
-      "plugins": {
-        "$ref": "$[\"service\"][\"plugins\"]"
-      },
+      "frameworkVersion": "2",
       "custom": {
         "$ref": "$[\"service\"][\"custom\"]"
       },
@@ -551,13 +640,19 @@
       },
       "functions": {
         "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
       }
     },
     "isDashboardMonitoringPreconfigured": false,
-    "artifact": "/home/enerco/guros/fstack_chg/.serverless/serverless-flask.zip"
+    "artifact": "/home/enerco/guros/fstack_chg/.serverless/guros-challange.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/serverless-flask/dev/1619925148956-2021-05-02T03:12:28.956Z",
-    "artifact": "serverless-flask.zip"
+    "artifactDirectoryName": "serverless/guros-challange/dev/1619935914730-2021-05-02T06:11:54.730Z",
+    "artifact": "guros-challange.zip"
   }
 }

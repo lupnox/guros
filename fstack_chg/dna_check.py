@@ -1,6 +1,31 @@
 #Main function to check for sequences of repeated dna code
 #EMV
-def cerebro(dna):
+import os
+import json
+import logging
+from dynapp import save_entry
+
+def cerebro(event,context):
+	#base validation
+	data = json.loads(event['body'])
+    if 'dna' not in data:
+        logging.error("Validation Failed")
+        raise Exception("Expected data in 'dna' key")
+        return
+	if(scan_dna(data['dna'])):
+		response = {
+        "statusCode": 200,
+        "body": "Mutation found!"                  
+    	}
+    else:
+    	response = {
+        "statusCode": 403,
+        "body": "No mutation found"                  
+    	}
+    return response
+
+
+def scan_dna(dna)
 	n = len(dna)
 	mcount = 0
 	gna = ['A','C','G','T']

@@ -71,10 +71,10 @@
         }
       }
     },
-    "AppLogGroup": {
+    "ApiLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/serverless-flask-dev-app"
+        "LogGroupName": "/aws/lambda/guros-challange-dev-api"
       }
     },
     "IamRoleLambdaExecution": {
@@ -102,7 +102,7 @@
               "Fn::Join": [
                 "-",
                 [
-                  "serverless-flask",
+                  "guros-challange",
                   "dev",
                   "lambda"
                 ]
@@ -119,7 +119,7 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev*:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/guros-challange-dev*:*"
                     }
                   ]
                 },
@@ -130,7 +130,26 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev*:*:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/guros-challange-dev*:*:*"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteItem"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "DNATable",
+                        "Arn"
+                      ]
                     }
                   ]
                 }
@@ -143,7 +162,7 @@
           "Fn::Join": [
             "-",
             [
-              "serverless-flask",
+              "guros-challange",
               "dev",
               {
                 "Ref": "AWS::Region"
@@ -154,20 +173,25 @@
         }
       }
     },
-    "AppLambdaFunction": {
+    "ApiLambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/serverless-flask/dev/1619925148956-2021-05-02T03:12:28.956Z/serverless-flask.zip"
+          "S3Key": "serverless/guros-challange/dev/1619935914730-2021-05-02T06:11:54.730Z/guros-challange.zip"
         },
         "Handler": "wsgi_handler.handler",
         "Runtime": "python3.8",
-        "FunctionName": "serverless-flask-dev-app",
+        "FunctionName": "guros-challange-dev-api",
         "MemorySize": 1024,
         "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "DNA_TABLE": "dna-table-dev"
+          }
+        },
         "Role": {
           "Fn::GetAtt": [
             "IamRoleLambdaExecution",
@@ -176,23 +200,23 @@
         }
       },
       "DependsOn": [
-        "AppLogGroup"
+        "ApiLogGroup"
       ]
     },
-    "AppLambdaVersioncKseB1jVtUvL0rIiELfwTTcH8adKtwAB1lD6uisGeU": {
+    "ApiLambdaVersionesZCygs7tzHFYenvndmcKJy7QENLn8hwvxK5uP684": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
-          "Ref": "AppLambdaFunction"
+          "Ref": "ApiLambdaFunction"
         },
-        "CodeSha256": "fuVsXAkGso5iN6fEdBHkpbxZ7/Tk24Ey2mQyS5yGYEE="
+        "CodeSha256": "XHyOBdsWO+JtAv1iT6Bt/1kevB3YApfEP4AnWtq4u2c="
       }
     },
     "ApiGatewayRestApi": {
       "Type": "AWS::ApiGateway::RestApi",
       "Properties": {
-        "Name": "dev-serverless-flask",
+        "Name": "dev-guros-challange",
         "EndpointConfiguration": {
           "Types": [
             "EDGE"
@@ -250,7 +274,7 @@
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "AppLambdaFunction",
+                    "ApiLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -293,7 +317,7 @@
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "AppLambdaFunction",
+                    "ApiLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -305,7 +329,7 @@
         "MethodResponses": []
       }
     },
-    "ApiGatewayDeployment1619925144778": {
+    "ApiGatewayDeployment1619935890966": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -318,12 +342,12 @@
         "ApiGatewayMethodProxyVarAny"
       ]
     },
-    "AppLambdaPermissionApiGateway": {
+    "ApiLambdaPermissionApiGateway": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "FunctionName": {
           "Fn::GetAtt": [
-            "AppLambdaFunction",
+            "ApiLambdaFunction",
             "Arn"
           ]
         },
@@ -354,6 +378,28 @@
           ]
         }
       }
+    },
+    "DNATable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "dnaId",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "dnaId",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 1,
+          "WriteCapacityUnits": 1
+        },
+        "TableName": "dna-table-dev"
+      }
     }
   },
   "Outputs": {
@@ -362,16 +408,16 @@
         "Ref": "ServerlessDeploymentBucket"
       },
       "Export": {
-        "Name": "sls-serverless-flask-dev-ServerlessDeploymentBucketName"
+        "Name": "sls-guros-challange-dev-ServerlessDeploymentBucketName"
       }
     },
-    "AppLambdaFunctionQualifiedArn": {
+    "ApiLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "AppLambdaVersioncKseB1jVtUvL0rIiELfwTTcH8adKtwAB1lD6uisGeU"
+        "Ref": "ApiLambdaVersionesZCygs7tzHFYenvndmcKJy7QENLn8hwvxK5uP684"
       },
       "Export": {
-        "Name": "sls-serverless-flask-dev-AppLambdaFunctionQualifiedArn"
+        "Name": "sls-guros-challange-dev-ApiLambdaFunctionQualifiedArn"
       }
     },
     "ServiceEndpoint": {
@@ -397,7 +443,7 @@
         ]
       },
       "Export": {
-        "Name": "sls-serverless-flask-dev-ServiceEndpoint"
+        "Name": "sls-guros-challange-dev-ServiceEndpoint"
       }
     }
   }

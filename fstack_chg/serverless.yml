@@ -1,43 +1,33 @@
 service: guros-challange
 
-frameworkVersion: '2'
-
-custom:
-  tableName: 'dna-table-${self:provider.stage}'
-  wsgi:
-    app: app.app
+frameworkVersion: ">=1.1.0 <=2.1.1"
 
 provider:
   name: aws
   runtime: python3.8
-  lambdaHashingVersion: '20201221'
-  stage: dev
-  iam:
-    role:
-      statements:
-        - Effect: Allow
-          Action:
-            - dynamodb:Query
-            - dynamodb:Scan
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            - dynamodb:DeleteItem
-          Resource:
-            - Fn::GetAtt: [ DNATable, Arn ]
+  region: us-west-1
   environment:
-    DNA_TABLE: ${self:custom.tableName}
-
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+      
 functions:
-  api:
-    handler: wsgi_handler.handler
+  check:
+    handler: dna_check.cerebro
     events:
-      - http:
-          path: /
-          method: ANY
-      - http:
-          path: /{proxy+}
-          method: ANY
+      - http: 'POST /mutation'
+  getstats:
+    handler: dynamo.get_stats
+    events:
+      - http: 'GET /stats'
 
 plugins:
   - serverless-wsgi
