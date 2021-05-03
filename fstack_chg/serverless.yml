@@ -1,3 +1,5 @@
+org: lupnox
+app: guros-challange
 service: guros-challange
 
 frameworkVersion: "2"
@@ -24,13 +26,10 @@ functions:
     handler: dna_check.cerebro
     events:
       - http: 'POST /mutation'
-  getstats:
-    handler: dynapp.get_stats
-    events:
-      - http: 'GET /stats'
 
 plugins:
   - serverless-python-requirements
+  - serverless-kms-grants
 
 resources:
   Resources:

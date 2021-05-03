@@ -107,12 +107,6 @@
               "LogGroupName": "/aws/lambda/guros-challange-dev-check"
             }
           },
-          "GetstatsLogGroup": {
-            "Type": "AWS::Logs::LogGroup",
-            "Properties": {
-              "LogGroupName": "/aws/lambda/guros-challange-dev-getstats"
-            }
-          },
           "IamRoleLambdaExecution": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -193,6 +187,52 @@
               }
             }
           },
+          "EnterpriseLogAccessIamRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "AWS": "arn:aws:iam::802587217904:root"
+                    },
+                    "Action": "sts:AssumeRole",
+                    "Condition": {
+                      "StringEquals": {
+                        "sts:ExternalId": "ServerlessEnterprise-x8rPJxn4t5gRNKpDfV"
+                      }
+                    }
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": "LogFilterAccess",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:FilterLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::GetAtt": [
+                              "CheckLogGroup",
+                              "Arn"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "CheckLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
@@ -200,9 +240,9 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/guros-challange/dev/1619941280525-2021-05-02T07:41:20.525Z/guros-challange.zip"
+                "S3Key": "serverless/guros-challange/dev/1620015365192-2021-05-03T04:16:05.192Z/guros-challange.zip"
               },
-              "Handler": "dna_check.cerebro",
+              "Handler": "s_check.handler",
               "Runtime": "python3.8",
               "FunctionName": "guros-challange-dev-check",
               "MemorySize": 1024,
@@ -223,54 +263,14 @@
               "CheckLogGroup"
             ]
           },
-          "GetstatsLambdaFunction": {
-            "Type": "AWS::Lambda::Function",
-            "Properties": {
-              "Code": {
-                "S3Bucket": {
-                  "Ref": "ServerlessDeploymentBucket"
-                },
-                "S3Key": "serverless/guros-challange/dev/1619941280525-2021-05-02T07:41:20.525Z/guros-challange.zip"
-              },
-              "Handler": "dynapp.get_stats",
-              "Runtime": "python3.8",
-              "FunctionName": "guros-challange-dev-getstats",
-              "MemorySize": 1024,
-              "Timeout": 6,
-              "Environment": {
-                "Variables": {
-                  "DYNAMODB_TABLE": "guros-challange-dev"
-                }
-              },
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              }
-            },
-            "DependsOn": [
-              "GetstatsLogGroup"
-            ]
-          },
-          "CheckLambdaVersionYJxPGUdmIJPOAVNKooPyVtUT8hr0wwlximdb8Fm9vQ": {
+          "CheckLambdaVersionbo0e35zlmmOJvIlWtbyV5lkpSYab5iKF5xgV1UFM7o": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "CheckLambdaFunction"
               },
-              "CodeSha256": "1X9J1F+AERA1oWTnqJ0oTn/LZ6PIPlHG4VFhJSGT8T4="
-            }
-          },
-          "GetstatsLambdaVersionh6KKRdBq14p0rWplQBhg5ZpLtCToQJCiEqx0KvrdBWI": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "GetstatsLambdaFunction"
-              },
-              "CodeSha256": "1X9J1F+AERA1oWTnqJ0oTn/LZ6PIPlHG4VFhJSGT8T4="
+              "CodeSha256": "/Y08v+cxn+Bru2KHtq8Zpr7PnbmTZxp4lJHPimBV80Y="
             }
           },
           "ApiGatewayRestApi": {
@@ -295,21 +295,6 @@
                 ]
               },
               "PathPart": "mutation",
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              }
-            }
-          },
-          "ApiGatewayResourceStats": {
-            "Type": "AWS::ApiGateway::Resource",
-            "Properties": {
-              "ParentId": {
-                "Fn::GetAtt": [
-                  "ApiGatewayRestApi",
-                  "RootResourceId"
-                ]
-              },
-              "PathPart": "stats",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
@@ -358,50 +343,7 @@
               "MethodResponses": []
             }
           },
-          "ApiGatewayMethodStatsGet": {
-            "Type": "AWS::ApiGateway::Method",
-            "Properties": {
-              "HttpMethod": "GET",
-              "RequestParameters": {},
-              "ResourceId": {
-                "Ref": "ApiGatewayResourceStats"
-              },
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              },
-              "ApiKeyRequired": false,
-              "AuthorizationType": "NONE",
-              "Integration": {
-                "IntegrationHttpMethod": "POST",
-                "Type": "AWS_PROXY",
-                "Uri": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition"
-                      },
-                      ":apigateway:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
-                      ":lambda:path/2015-03-31/functions/",
-                      {
-                        "Fn::GetAtt": [
-                          "GetstatsLambdaFunction",
-                          "Arn"
-                        ]
-                      },
-                      "/invocations"
-                    ]
-                  ]
-                }
-              },
-              "MethodResponses": []
-            }
-          },
-          "ApiGatewayDeployment1619941268535": {
+          "ApiGatewayDeployment1620015348373": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -410,8 +352,7 @@
               "StageName": "dev"
             },
             "DependsOn": [
-              "ApiGatewayMethodMutationPost",
-              "ApiGatewayMethodStatsGet"
+              "ApiGatewayMethodMutationPost"
             ]
           },
           "CheckLambdaPermissionApiGateway": {
@@ -451,42 +392,132 @@
               }
             }
           },
-          "GetstatsLambdaPermissionApiGateway": {
-            "Type": "AWS::Lambda::Permission",
+          "ApiGatewayLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "FunctionName": {
+              "LogGroupName": "/aws/api-gateway/guros-challange-dev"
+            }
+          },
+          "CustomApiGatewayAccountCloudWatchRole": {
+            "Type": "Custom::ApiGatewayAccountRole",
+            "Version": 1,
+            "Properties": {
+              "ServiceToken": {
                 "Fn::GetAtt": [
-                  "GetstatsLambdaFunction",
+                  "CustomDashresourceDashapigwDashcwDashroleLambdaFunction",
                   "Arn"
-                ]
-              },
-              "Action": "lambda:InvokeFunction",
-              "Principal": "apigateway.amazonaws.com",
-              "SourceArn": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      "Ref": "AWS::Partition"
-                    },
-                    ":execute-api:",
-                    {
-                      "Ref": "AWS::Region"
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId"
-                    },
-                    ":",
-                    {
-                      "Ref": "ApiGatewayRestApi"
-                    },
-                    "/*/*"
-                  ]
                 ]
               }
             }
+          },
+          "IamRoleCustomResourcesLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "dev",
+                        "guros-challange",
+                        "custom-resources-lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Resource": {
+                          "Fn::Join": [
+                            ":",
+                            [
+                              "arn",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              "iam:",
+                              {
+                                "Ref": "AWS::AccountId"
+                              },
+                              "role/*"
+                            ]
+                          ]
+                        },
+                        "Action": [
+                          "iam:AttachRolePolicy",
+                          "iam:CreateRole",
+                          "iam:ListAttachedRolePolicies",
+                          "iam:PassRole"
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Resource": {
+                          "Fn::Join": [
+                            ":",
+                            [
+                              "arn",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              "apigateway:*::/account"
+                            ]
+                          ]
+                        },
+                        "Action": [
+                          "apigateway:GET",
+                          "apigateway:PATCH"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "CustomDashresourceDashapigwDashcwDashroleLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/guros-challange/dev/1620015365192-2021-05-03T04:16:05.192Z/custom-resources.zip"
+              },
+              "FunctionName": "guros-challange-dev-custom-resource-apigw-cw-role",
+              "Handler": "apiGatewayCloudWatchRole/handler.handler",
+              "MemorySize": 1024,
+              "Runtime": "nodejs12.x",
+              "Timeout": 180,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleCustomResourcesLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "IamRoleCustomResourcesLambdaExecution"
+            ]
           },
           "DNATable": {
             "Type": "AWS::DynamoDB::Table",
@@ -509,6 +540,26 @@
               },
               "TableName": "dna-table"
             }
+          },
+          "CloudWatchLogsSubscriptionFilterCheckLogGroup": {
+            "Type": "AWS::Logs::SubscriptionFilter",
+            "Properties": {
+              "DestinationArn": "arn:aws:logs:us-west-1:802587217904:destination:x8rPJxn4t5gRNKpDfV#xYmlfgvqRvYVVVPnNp#guros-challange#dev",
+              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
+              "LogGroupName": {
+                "Ref": "CheckLogGroup"
+              }
+            }
+          },
+          "CloudWatchLogsSubscriptionFilterApiGatewayLogGroup": {
+            "Type": "AWS::Logs::SubscriptionFilter",
+            "Properties": {
+              "DestinationArn": "arn:aws:logs:us-west-1:802587217904:destination:x8rPJxn4t5gRNKpDfV#xYmlfgvqRvYVVVPnNp#guros-challange#dev",
+              "FilterPattern": "\"SLS_ACCESS_LOG\"",
+              "LogGroupName": {
+                "Ref": "ApiGatewayLogGroup"
+              }
+            }
           }
         },
         "Outputs": {
@@ -520,22 +571,24 @@
               "Name": "sls-guros-challange-dev-ServerlessDeploymentBucketName"
             }
           },
+          "EnterpriseLogAccessIamRole": {
+            "Value": {
+              "Fn::GetAtt": [
+                "EnterpriseLogAccessIamRole",
+                "Arn"
+              ]
+            },
+            "Export": {
+              "Name": "sls-guros-challange-dev-EnterpriseLogAccessIamRole"
+            }
+          },
           "CheckLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "CheckLambdaVersionYJxPGUdmIJPOAVNKooPyVtUT8hr0wwlximdb8Fm9vQ"
+              "Ref": "CheckLambdaVersionbo0e35zlmmOJvIlWtbyV5lkpSYab5iKF5xgV1UFM7o"
             },
             "Export": {
               "Name": "sls-guros-challange-dev-CheckLambdaFunctionQualifiedArn"
-            }
-          },
-          "GetstatsLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "GetstatsLambdaVersionh6KKRdBq14p0rWplQBhg5ZpLtCToQJCiEqx0KvrdBWI"
-            },
-            "Export": {
-              "Name": "sls-guros-challange-dev-GetstatsLambdaFunctionQualifiedArn"
             }
           },
           "ServiceEndpoint": {
@@ -648,15 +701,21 @@
           }
         }
       },
+      "logs": {
+        "restApi": {
+          "format": "{\"requestTime\":\"$context.requestTime\",\"requestId\":\"$context.requestId\",\"apiId\":\"$context.apiId\",\"resourceId\":\"$context.resourceId\",\"resourcePath\":\"$context.resourcePath\",\"path\":\"$context.path\",\"httpMethod\":\"$context.httpMethod\",\"status\":\"$context.status\",\"authLatency\":\"$context.authorizer.integrationLatency\",\"integrationLatency\":\"$context.integrationLatency\",\"integrationStatus\":\"$context.integrationStatus\",\"responseLatency\":\"$context.responseLatency\",\"responseLength\":\"$context.responseLength\",\"errorMessage\":\"$context.error.message\",\"format\":\"SLS_ACCESS_LOG\",\"version\":\"1.0.0\"}"
+        }
+      },
       "vpc": {}
     },
     "plugins": [
-      "serverless-python-requirements"
+      "serverless-python-requirements",
+      "serverless-kms-grants"
     ],
     "pluginsData": {},
     "functions": {
       "check": {
-        "handler": "dna_check.cerebro",
+        "handler": "s_check.handler",
         "events": [
           {
             "http": "POST /mutation"
@@ -668,22 +727,7 @@
         "timeout": 6,
         "runtime": "python3.8",
         "vpc": {},
-        "versionLogicalId": "CheckLambdaVersionYJxPGUdmIJPOAVNKooPyVtUT8hr0wwlximdb8Fm9vQ"
-      },
-      "getstats": {
-        "handler": "dynapp.get_stats",
-        "events": [
-          {
-            "http": "GET /stats"
-          }
-        ],
-        "name": "guros-challange-dev-getstats",
-        "package": {},
-        "memory": 1024,
-        "timeout": 6,
-        "runtime": "python3.8",
-        "vpc": {},
-        "versionLogicalId": "GetstatsLambdaVersionh6KKRdBq14p0rWplQBhg5ZpLtCToQJCiEqx0KvrdBWI"
+        "versionLogicalId": "CheckLambdaVersionbo0e35zlmmOJvIlWtbyV5lkpSYab5iKF5xgV1UFM7o"
       }
     },
     "resources": {
@@ -715,8 +759,12 @@
     },
     "configValidationMode": "warn",
     "serviceFilename": "serverless.yml",
+    "app": "guros-challange",
+    "org": "lupnox",
     "layers": {},
     "initialServerlessConfig": {
+      "org": "lupnox",
+      "app": "guros-challange",
       "service": {
         "$ref": "$[\"service\"][\"serviceObject\"]"
       },
@@ -734,11 +782,14 @@
         "$ref": "$[\"service\"][\"resources\"]"
       }
     },
-    "isDashboardMonitoringPreconfigured": false,
+    "isDashboardMonitoringPreconfigured": true,
+    "isDashboardAppPreconfigured": true,
+    "orgUid": "x8rPJxn4t5gRNKpDfV",
+    "appUid": "xYmlfgvqRvYVVVPnNp",
     "artifact": "/home/enerco/guros/fstack_chg/.serverless/guros-challange.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/guros-challange/dev/1619941280525-2021-05-02T07:41:20.525Z",
+    "artifactDirectoryName": "serverless/guros-challange/dev/1620015365192-2021-05-03T04:16:05.192Z",
     "artifact": "guros-challange.zip"
   }
 }

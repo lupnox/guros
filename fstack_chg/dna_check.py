@@ -3,22 +3,29 @@
 import os
 import json
 import logging
-from dynapp import save_entry
+#from dynapp import save_entry
 
 def cerebro(event,context):
 	#base validation
 	data = json.loads(event['body'])
-	if 'dna' not in data:
+	print(data)
+	print(type(data))
+	if not 'dna' in data:
 		logging.error("Validation Failed")
-		raise Exception("Expected data in 'dna' key")
-		return
+		response = {
+			"statusCode": 400,
+			"body": "Expected data in 'dna' key"                  
+		}
+		return response
 
-	mutant =scan_dna(data['dna'])
+	mutant = scan_dna(data['dna'])
 	if(mutant):
 		response = {
 			"statusCode": 200,
 			"body": "Mutation found!"                  
 		}
+		return response
+		#save_entry()
 	else:
 		response = {
 			"statusCode": 403,
@@ -30,6 +37,7 @@ def scan_dna(dna):
 	n = len(dna)
 	mcount = 0
 	gna = ['A','C','G','T']
+	print(dna)
 	for element in gna:		
 	#horizonal lookup
 		for i in range(n-3):
