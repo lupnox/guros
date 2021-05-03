@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-fstack_chg/__pycache__/
+/fstack_chg/__pycache__/
 /*.py[cod]
 /*$py.class
 
@@ -7,6 +7,9 @@ fstack_chg/__pycache__/
 *.so
 
 # Distribution / packaging
-fstack_chg/venv/
-fstack_chg/.serverless/
-fstack_chg/node_modules/
+/fstack_chg/venv/
+/fstack_chg/.serverless/
+/fstack_chg/node_modules/
+
+#node packs
+/fstack_chg/package*
