@@ -1,6 +1,6 @@
 #DynamoDB handler
 import os
-#import uuid
+import uuid
 import json
 import boto3
 import logging
@@ -11,6 +11,12 @@ table = dynamodb.Table(os.environ['DNA_TABLE'])
 
 
 def save_entry(result):
+    entry = {
+        'dnaId': str(uuid.uuid1()),
+        'mutation': result,
+    }
+    # write the todo to the database
+    table.put_item(Item=entry)
     return
 
 def get_count(args):
@@ -33,7 +39,6 @@ def get_results(event,context):
     muggles = get_count(scan_kwargs)
     ratio = mutants/muggles
     data = {"count_mutations": mutants,"count_no_mutation": muggles,"ratio": ratio}
-
     response = {
         "statusCode": 200,
         "body": json.dumps(data)

@@ -231,7 +231,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/cerebro/dev/1620027069533-2021-05-03T07:31:09.533Z/cerebro.zip"
+          "S3Key": "serverless/cerebro/dev/1620028056672-2021-05-03T07:47:36.672Z/cerebro.zip"
         },
         "Handler": "s_scan.handler",
         "Runtime": "python3.8",
@@ -261,7 +261,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/cerebro/dev/1620027069533-2021-05-03T07:31:09.533Z/cerebro.zip"
+          "S3Key": "serverless/cerebro/dev/1620028056672-2021-05-03T07:47:36.672Z/cerebro.zip"
         },
         "Handler": "s_getstats.handler",
         "Runtime": "python3.8",
@@ -284,24 +284,24 @@
         "GetstatsLogGroup"
       ]
     },
-    "GetstatsLambdaVersion0AP10GXWup9YPilyF6HMdFnRTHkgCFKiIYYrNT93a6Y": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "GetstatsLambdaFunction"
-        },
-        "CodeSha256": "4wKp7LD4vYBKkpINUwr0fMIX7CF7X0QbfwB/smpb5p0="
-      }
-    },
-    "ScanLambdaVersion7EpWROTthhHaf0S7h7EEa6duOhe0c6zu3aElYwpWjM": {
+    "ScanLambdaVersion2M7erKjitdLnCbfTeRCXnYrf3sxWYkfkSbBf93Sf0E": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "ScanLambdaFunction"
         },
-        "CodeSha256": "4wKp7LD4vYBKkpINUwr0fMIX7CF7X0QbfwB/smpb5p0="
+        "CodeSha256": "Z2fnobenKiNmPEvnuPTJ2a9snUkG0GqrCyPqACNPNFg="
+      }
+    },
+    "GetstatsLambdaVersionByudQrE8aVa6bFVaAQclumKoudt4prnt5dUPjOQ": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "GetstatsLambdaFunction"
+        },
+        "CodeSha256": "Z2fnobenKiNmPEvnuPTJ2a9snUkG0GqrCyPqACNPNFg="
       }
     },
     "ApiGatewayRestApi": {
@@ -432,7 +432,7 @@
         "MethodResponses": []
       }
     },
-    "ApiGatewayDeployment1620027053013": {
+    "ApiGatewayDeployment1620028038910": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -628,7 +628,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/cerebro/dev/1620027069533-2021-05-03T07:31:09.533Z/custom-resources.zip"
+          "S3Key": "serverless/cerebro/dev/1620028056672-2021-05-03T07:47:36.672Z/custom-resources.zip"
         },
         "FunctionName": "cerebro-dev-custom-resource-apigw-cw-role",
         "Handler": "apiGatewayCloudWatchRole/handler.handler",
@@ -719,22 +719,22 @@
         "Name": "sls-cerebro-dev-EnterpriseLogAccessIamRole"
       }
     },
-    "GetstatsLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "GetstatsLambdaVersion0AP10GXWup9YPilyF6HMdFnRTHkgCFKiIYYrNT93a6Y"
-      },
-      "Export": {
-        "Name": "sls-cerebro-dev-GetstatsLambdaFunctionQualifiedArn"
-      }
-    },
     "ScanLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ScanLambdaVersion7EpWROTthhHaf0S7h7EEa6duOhe0c6zu3aElYwpWjM"
+        "Ref": "ScanLambdaVersion2M7erKjitdLnCbfTeRCXnYrf3sxWYkfkSbBf93Sf0E"
       },
       "Export": {
         "Name": "sls-cerebro-dev-ScanLambdaFunctionQualifiedArn"
+      }
+    },
+    "GetstatsLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "GetstatsLambdaVersionByudQrE8aVa6bFVaAQclumKoudt4prnt5dUPjOQ"
+      },
+      "Export": {
+        "Name": "sls-cerebro-dev-GetstatsLambdaFunctionQualifiedArn"
       }
     },
     "ServiceEndpoint": {

@@ -3,7 +3,7 @@
 import os
 import json
 import logging
-#from dynapp import save_entry
+from dynapp import save_entry
 
 def cerebro(event,context):
 	#base validation
@@ -17,13 +17,13 @@ def cerebro(event,context):
 		return response
 
 	mutant = scan_dna(data['dna'])
+	save_entry(mutant)
 	if(mutant):
 		response = {
 			"statusCode": 200,
 			"body": "Mutation found!"                  
 		}
 		return response
-		#save_entry()
 	else:
 		response = {
 			"statusCode": 403,
