@@ -71,10 +71,16 @@
         }
       }
     },
-    "CheckLogGroup": {
+    "ScanLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/guros-challange-dev-check"
+        "LogGroupName": "/aws/lambda/cerebro-dev-scan"
+      }
+    },
+    "GetstatsLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/cerebro-dev-getstats"
       }
     },
     "IamRoleLambdaExecution": {
@@ -102,7 +108,7 @@
               "Fn::Join": [
                 "-",
                 [
-                  "guros-challange",
+                  "cerebro",
                   "dev",
                   "lambda"
                 ]
@@ -119,7 +125,7 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/guros-challange-dev*:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/cerebro-dev*:*"
                     }
                   ]
                 },
@@ -130,7 +136,7 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/guros-challange-dev*:*:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/cerebro-dev*:*:*"
                     }
                   ]
                 },
@@ -144,7 +150,7 @@
                     "dynamodb:UpdateItem",
                     "dynamodb:DeleteItem"
                   ],
-                  "Resource": "arn:aws:dynamodb:us-west-1:*:table/guros-challange-dev"
+                  "Resource": "arn:aws:dynamodb:us-west-1:*:table/cerebro-dev"
                 }
               ]
             }
@@ -155,7 +161,7 @@
           "Fn::Join": [
             "-",
             [
-              "guros-challange",
+              "cerebro",
               "dev",
               {
                 "Ref": "AWS::Region"
@@ -200,7 +206,13 @@
                   "Resource": [
                     {
                       "Fn::GetAtt": [
-                        "CheckLogGroup",
+                        "ScanLogGroup",
+                        "Arn"
+                      ]
+                    },
+                    {
+                      "Fn::GetAtt": [
+                        "GetstatsLogGroup",
                         "Arn"
                       ]
                     }
@@ -212,23 +224,23 @@
         ]
       }
     },
-    "CheckLambdaFunction": {
+    "ScanLambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/guros-challange/dev/1620015365192-2021-05-03T04:16:05.192Z/guros-challange.zip"
+          "S3Key": "serverless/cerebro/dev/1620027069533-2021-05-03T07:31:09.533Z/cerebro.zip"
         },
-        "Handler": "s_check.handler",
+        "Handler": "s_scan.handler",
         "Runtime": "python3.8",
-        "FunctionName": "guros-challange-dev-check",
+        "FunctionName": "cerebro-dev-scan",
         "MemorySize": 1024,
         "Timeout": 6,
         "Environment": {
           "Variables": {
-            "DYNAMODB_TABLE": "guros-challange-dev"
+            "DNA_TABLE": "cerebro-dev"
           }
         },
         "Role": {
@@ -239,23 +251,63 @@
         }
       },
       "DependsOn": [
-        "CheckLogGroup"
+        "ScanLogGroup"
       ]
     },
-    "CheckLambdaVersionbo0e35zlmmOJvIlWtbyV5lkpSYab5iKF5xgV1UFM7o": {
+    "GetstatsLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/cerebro/dev/1620027069533-2021-05-03T07:31:09.533Z/cerebro.zip"
+        },
+        "Handler": "s_getstats.handler",
+        "Runtime": "python3.8",
+        "FunctionName": "cerebro-dev-getstats",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "DNA_TABLE": "cerebro-dev"
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "GetstatsLogGroup"
+      ]
+    },
+    "GetstatsLambdaVersion0AP10GXWup9YPilyF6HMdFnRTHkgCFKiIYYrNT93a6Y": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
-          "Ref": "CheckLambdaFunction"
+          "Ref": "GetstatsLambdaFunction"
         },
-        "CodeSha256": "/Y08v+cxn+Bru2KHtq8Zpr7PnbmTZxp4lJHPimBV80Y="
+        "CodeSha256": "4wKp7LD4vYBKkpINUwr0fMIX7CF7X0QbfwB/smpb5p0="
+      }
+    },
+    "ScanLambdaVersion7EpWROTthhHaf0S7h7EEa6duOhe0c6zu3aElYwpWjM": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ScanLambdaFunction"
+        },
+        "CodeSha256": "4wKp7LD4vYBKkpINUwr0fMIX7CF7X0QbfwB/smpb5p0="
       }
     },
     "ApiGatewayRestApi": {
       "Type": "AWS::ApiGateway::RestApi",
       "Properties": {
-        "Name": "dev-guros-challange",
+        "Name": "dev-cerebro",
         "EndpointConfiguration": {
           "Types": [
             "EDGE"
@@ -274,6 +326,21 @@
           ]
         },
         "PathPart": "mutation",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayResourceStats": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ApiGatewayRestApi",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "stats",
         "RestApiId": {
           "Ref": "ApiGatewayRestApi"
         }
@@ -310,7 +377,7 @@
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "CheckLambdaFunction",
+                    "ScanLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -322,7 +389,50 @@
         "MethodResponses": []
       }
     },
-    "ApiGatewayDeployment1620015348373": {
+    "ApiGatewayMethodStatsGet": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "GET",
+        "RequestParameters": {},
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceStats"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "GetstatsLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "MethodResponses": []
+      }
+    },
+    "ApiGatewayDeployment1620027053013": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -331,15 +441,53 @@
         "StageName": "dev"
       },
       "DependsOn": [
-        "ApiGatewayMethodMutationPost"
+        "ApiGatewayMethodMutationPost",
+        "ApiGatewayMethodStatsGet"
       ]
     },
-    "CheckLambdaPermissionApiGateway": {
+    "ScanLambdaPermissionApiGateway": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "FunctionName": {
           "Fn::GetAtt": [
-            "CheckLambdaFunction",
+            "ScanLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      }
+    },
+    "GetstatsLambdaPermissionApiGateway": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "GetstatsLambdaFunction",
             "Arn"
           ]
         },
@@ -374,7 +522,7 @@
     "ApiGatewayLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/api-gateway/guros-challange-dev"
+        "LogGroupName": "/aws/api-gateway/cerebro-dev"
       }
     },
     "CustomApiGatewayAccountCloudWatchRole": {
@@ -415,7 +563,7 @@
                 "-",
                 [
                   "dev",
-                  "guros-challange",
+                  "cerebro",
                   "custom-resources-lambda"
                 ]
               ]
@@ -480,9 +628,9 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/guros-challange/dev/1620015365192-2021-05-03T04:16:05.192Z/custom-resources.zip"
+          "S3Key": "serverless/cerebro/dev/1620027069533-2021-05-03T07:31:09.533Z/custom-resources.zip"
         },
-        "FunctionName": "guros-challange-dev-custom-resource-apigw-cw-role",
+        "FunctionName": "cerebro-dev-custom-resource-apigw-cw-role",
         "Handler": "apiGatewayCloudWatchRole/handler.handler",
         "MemorySize": 1024,
         "Runtime": "nodejs12.x",
@@ -517,23 +665,33 @@
           "ReadCapacityUnits": 1,
           "WriteCapacityUnits": 1
         },
-        "TableName": "dna-table"
+        "TableName": "cerebro-dev"
       }
     },
-    "CloudWatchLogsSubscriptionFilterCheckLogGroup": {
+    "CloudWatchLogsSubscriptionFilterScanLogGroup": {
       "Type": "AWS::Logs::SubscriptionFilter",
       "Properties": {
-        "DestinationArn": "arn:aws:logs:us-west-1:802587217904:destination:x8rPJxn4t5gRNKpDfV#xYmlfgvqRvYVVVPnNp#guros-challange#dev",
+        "DestinationArn": "arn:aws:logs:us-west-1:802587217904:destination:x8rPJxn4t5gRNKpDfV#xYmlfgvqRvYVVVPnNp#cerebro#dev",
         "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
         "LogGroupName": {
-          "Ref": "CheckLogGroup"
+          "Ref": "ScanLogGroup"
+        }
+      }
+    },
+    "CloudWatchLogsSubscriptionFilterGetstatsLogGroup": {
+      "Type": "AWS::Logs::SubscriptionFilter",
+      "Properties": {
+        "DestinationArn": "arn:aws:logs:us-west-1:802587217904:destination:x8rPJxn4t5gRNKpDfV#xYmlfgvqRvYVVVPnNp#cerebro#dev",
+        "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
+        "LogGroupName": {
+          "Ref": "GetstatsLogGroup"
         }
       }
     },
     "CloudWatchLogsSubscriptionFilterApiGatewayLogGroup": {
       "Type": "AWS::Logs::SubscriptionFilter",
       "Properties": {
-        "DestinationArn": "arn:aws:logs:us-west-1:802587217904:destination:x8rPJxn4t5gRNKpDfV#xYmlfgvqRvYVVVPnNp#guros-challange#dev",
+        "DestinationArn": "arn:aws:logs:us-west-1:802587217904:destination:x8rPJxn4t5gRNKpDfV#xYmlfgvqRvYVVVPnNp#cerebro#dev",
         "FilterPattern": "\"SLS_ACCESS_LOG\"",
         "LogGroupName": {
           "Ref": "ApiGatewayLogGroup"
@@ -547,7 +705,7 @@
         "Ref": "ServerlessDeploymentBucket"
       },
       "Export": {
-        "Name": "sls-guros-challange-dev-ServerlessDeploymentBucketName"
+        "Name": "sls-cerebro-dev-ServerlessDeploymentBucketName"
       }
     },
     "EnterpriseLogAccessIamRole": {
@@ -558,16 +716,25 @@
         ]
       },
       "Export": {
-        "Name": "sls-guros-challange-dev-EnterpriseLogAccessIamRole"
+        "Name": "sls-cerebro-dev-EnterpriseLogAccessIamRole"
       }
     },
-    "CheckLambdaFunctionQualifiedArn": {
+    "GetstatsLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "CheckLambdaVersionbo0e35zlmmOJvIlWtbyV5lkpSYab5iKF5xgV1UFM7o"
+        "Ref": "GetstatsLambdaVersion0AP10GXWup9YPilyF6HMdFnRTHkgCFKiIYYrNT93a6Y"
       },
       "Export": {
-        "Name": "sls-guros-challange-dev-CheckLambdaFunctionQualifiedArn"
+        "Name": "sls-cerebro-dev-GetstatsLambdaFunctionQualifiedArn"
+      }
+    },
+    "ScanLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "ScanLambdaVersion7EpWROTthhHaf0S7h7EEa6duOhe0c6zu3aElYwpWjM"
+      },
+      "Export": {
+        "Name": "sls-cerebro-dev-ScanLambdaFunctionQualifiedArn"
       }
     },
     "ServiceEndpoint": {
@@ -593,7 +760,7 @@
         ]
       },
       "Export": {
-        "Name": "sls-guros-challange-dev-ServiceEndpoint"
+        "Name": "sls-cerebro-dev-ServiceEndpoint"
       }
     }
   }

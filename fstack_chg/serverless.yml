@@ -1,6 +1,6 @@
 org: lupnox
 app: guros-challange
-service: guros-challange
+service: cerebro
 
 frameworkVersion: "2"
 
@@ -9,7 +9,7 @@ provider:
   runtime: python3.8
   region: us-west-1
   environment:
-    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    DNA_TABLE: ${self:service}-${opt:stage, self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -19,13 +19,17 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DNA_TABLE}"
 
 functions:
-  check:
+  scan:
     handler: dna_check.cerebro
     events:
       - http: 'POST /mutation'
+  getstats:
+      handler: dynapp.get_results
+      events:
+        - http: 'GET /stats'
 
 plugins:
   - serverless-python-requirements
@@ -45,4 +49,4 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: dna-table
+        TableName: ${self:provider.environment.DNA_TABLE}
